@@ -1,0 +1,1 @@
+moveWeights.index(maxW)
