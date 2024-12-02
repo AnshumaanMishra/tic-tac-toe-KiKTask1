@@ -1,19 +1,76 @@
 import random
 import time
 
+def getCopy(board):
+    board2 = []
+    for i in board:
+        board2.append(i[::])
+    return board2
+
+def getValidMoves(board):
+    moves = []
+    for i in range(0, 3):
+        for j in range(0, 3):
+            if(board[i][j] == '.'):
+                moves.append((i, j))
+
+    return moves
+
+# Get moves if player wins in the next move
+def checkNextMoveWin(board):
+    moves = getValidMoves(board)
+    for i in moves:
+        board2 = getCopy(board)
+        board2[i[0]][i[1]] = 'X'
+        if(checkWin(board2) == 1):
+            return i
+    return (-1, -1)
+
+def checkCentreCondition(board):
+    if(board[1][1] != 'X'):
+        return (-1, -1)
+    if(board[0][0] == '.' and (board[0][2] == 'O' or board[2][0] == 'O')):
+        return (0, 0)
+    elif(board[2][2] == '.' and (board[0][2] == 'O' or board[2][0] == 'O')):
+        return (2, 2)
+    elif(board[2][0] == '.' and (board[0][0] == 'O' or board[2][2] == 'O')):
+        return (2, 0)
+    else:
+        return (0, 2)
+
+
+def getBestMove(board, character):
+    
+    ty, tx = checkCentreCondition(board)
+    if(ty != -1 and tx != -1):
+        return (ty, tx)
+
+    firstCheck = checkNextMoveWin(board)
+    if(firstCheck[0] != -1 and firstCheck[1] != -1):
+        return firstCheck
+    validMoves = getValidMoves(board)
+    # displayBoard(board)
+    for i in validMoves:
+        # print(i)
+        board2 = getCopy(board)
+        board2[i[0]][i[1]] = character
+        # displayBoard(board2)
+        if(checkWin(board2) == -1):
+            return i
+        newChar = 'X' if character=='O' else 'O'
+        ansMove = getBestMove(board2, newChar)
+        if(ansMove[0] != -1 and ansMove[1] != -1):
+            return ansMove
+    return (-1, -1)
+    
+
 # Generating Computer Move
 def compMove(board):
-    mov = random.randint(1, 10)
-    y = (9 - mov) // 3
-    x = (9 - mov - 1) % 3
+    x, y = getBestMove(board, 'O')
+    if(x == y == -1):
+        return getValidMoves(board)[0]
 
-    # Check for empty spaces
-    while(board[y][x] != '.'):
-        mov = random.randint(1, 10)
-        y = (9 - mov) // 3
-        x = (9 - mov - 1) % 3
-
-    return (y, x)
+    return (x, y)
 
 
 # Printing the board
@@ -53,9 +110,13 @@ movenum = 0  # To keep track of number of moves and checking tie
 
 
 displayBoard(board)
-print("Enter Keys from the numpad in order corresponding to the location of the cross")
+# print("Enter Keys from the numpad in order corresponding to the location of the cross")
 
-# Main Loop
+# print(getBestMove(board, 'O'))
+
+
+# Main Loop'
+
 while(checkWin(board) == 0):
     movenum += 1
 
